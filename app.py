@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import datetime
-import pyswisseph as swe
 from geopy.geocoders import Nominatim
 import google.generativeai as genai
 
@@ -18,23 +17,6 @@ geolocator = Nominatim(user_agent="vedic_horoscope_app")
 def get_coordinates(place):
     location = geolocator.geocode(place)
     return (location.latitude, location.longitude) if location else (0, 0)
-
-# Vedic calculations
-def get_vedic_data(birth_date, birth_time, birth_place):
-    lat, lon = get_coordinates(birth_place)
-    jd = swe.julday(birth_date.year, birth_date.month, birth_date.day, birth_time.hour + birth_time.minute / 60.0)
-    swe.set_topo(lat, lon, 0)
-    
-    sun_longitude = swe.calc_ut(jd, swe.SUN)[0]
-    rashi = (int(sun_longitude / 30) + 1) % 12
-    
-    asc_longitude = swe.houses(jd, lat, lon, 'P')[1][0]
-    lagna = (int(asc_longitude / 30) + 1) % 12
-    
-    moon_longitude = swe.calc_ut(jd, swe.MOON)[0]
-    nakshatra = (int(moon_longitude / 13.3333) + 1) % 27
-    
-    return rashi, lagna, nakshatra
 
 # Streamlit UI
 st.set_page_config(page_title="Vedic Astrology Chat", page_icon="✨")
@@ -67,10 +49,11 @@ if user_input:
             response = "Please enter a valid time (HH:MM)."
     elif "place" not in st.session_state:
         st.session_state.place = user_input
-        rashi, lagna, nakshatra = get_vedic_data(st.session_state.dob, st.session_state.tob, st.session_state.place)
-        response = f"Your Rashi: {rashi} | Lagna: {lagna} | Nakshatra: {nakshatra}\nWould you like a career or marriage prediction?"
+        lat, lon = get_coordinates(st.session_state.place)
+        response = f"Based on your birth details ({st.session_state.dob}, {st.session_state.tob}, {st.session_state.place}), would you like a career or marriage prediction?"
     else:
-        response = generate_text(f"Astrology insights for {st.session_state.name}: {user_input}")
+        prompt = f"Astrology insights for {st.session_state.name} born on {st.session_state.dob} at {st.session_state.tob} in {st.session_state.place}: {user_input}"
+        response = generate_text(prompt)
     
     messages.append({"role": "bot", "content": response})
     st.chat_message("bot").write(response)
