@@ -18,6 +18,9 @@ def get_coordinates(place):
     location = geolocator.geocode(place)
     return (location.latitude, location.longitude) if location else (0, 0)
 
+# App setup - Must be the first Streamlit command
+st.set_page_config(page_title="Vedic Astrology Chat", page_icon="✨", layout="wide")
+
 # Custom CSS for professional look
 st.markdown("""
     <style>
@@ -30,8 +33,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# App setup
-st.set_page_config(page_title="Vedic Astrology Chat", page_icon="✨", layout="wide")
 st.title("✨ Vedic Astrology Chat ✨")
 
 # Initialize session state
