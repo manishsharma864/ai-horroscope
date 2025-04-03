@@ -35,7 +35,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Password from secrets
-PASSWORD = st.secrets["APP_PASSWORD"]  # Retrieve password from Streamlit secrets
+PASSWORD = st.secrets["APP_PASSWORD"]
 
 # Initialize session state for authentication
 if "authenticated" not in st.session_state:
@@ -63,6 +63,14 @@ else:
         For accurate readings, including full Kundli analysis and predictions, consult a qualified astrologer.
         </div>
     """, unsafe_allow_html=True)
+
+    # Layout for Logout button at top left
+    col1, col2 = st.columns([1, 5])  # col1 for button, col2 for spacing
+    with col1:
+        if st.button("Logout"):
+            st.session_state.authenticated = False
+            st.session_state.clear()
+            st.rerun()
 
     # Initialize session state for chat
     if "messages" not in st.session_state:
@@ -161,9 +169,3 @@ else:
             st.session_state.messages = [{"role": "bot", "content": "Welcome! Please enter your name to begin."}]
             st.session_state.step = "name"
             st.rerun()
-
-    # Logout button
-    if st.button("Logout"):
-        st.session_state.authenticated = False
-        st.session_state.clear()
-        st.rerun()
